@@ -1,73 +1,73 @@
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import React, { useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import { useForm } from 'react-hook-form'; 
+import { editUser } from '../../services/controllerServices';
+import Modal from 'react-bootstrap/Modal';
 
-import * as mp_services from '../../services/avatarServices'
+function UserDetailModal() {
+  const [show, setShow] = useState(true);
+  const { register, handleSubmit } = useForm();
 
-export default function ShowProducto(){
+  const handleClose = () => setShow(false);
 
-    const [loading, setLoading] = useState(true)
-    const { id_producto } = useParams();
-    const [ myProducto, setProducto ] = useState({})
-    const [ myFoto, setFoto] = useState('')
-    const [ ciudad, setCiudad] = useState({})
-    const [ descrip, setDescrip] = useState('')
+  const onSubmit = (data) => {
+    console.log(data.id); 
+    handleClose(); 
+  };
 
-
-    useEffect(()=>{
-
-        const buscarById = async ()=>{
-            
-            const response = await mp_services.getById(id_producto)
-            const res_descrip = await mp_services.getDescriptionById(id_producto)
-
-            setDescrip(res_descrip.plain_text)
-            
-            setProducto(response)
-            setCiudad({
-                nombre: response.seller_address.city.name,
-                estado: response.seller_address.state.name
-            })
-            setFoto(response.pictures[0].secure_url)
-            setLoading(false)
-        }
-
-        buscarById()
-
-    },[id_producto]);
-
-    const comprarProducto = () => {
-      alert(`Próximamente acción para comprar artículo: ${myProducto.id}`);
-    };
-
-    if(loading){
-      return <>
-          <div> Cargando... </div>
-      </>
-    }else{
-
-      return (
-        <>
-          <div className="row">
-            <div className="card mb-3">
-
-              <img src={myFoto} className="card-img-top" alt={myProducto.title} />
-
-              <div className="card-body">
-
-                <h5> { myProducto.title}   </h5>
-                <p> { myProducto.warranty} </p>
-                <p> { descrip } </p>
-                <p> ${ myProducto.price}   </p>
-                <p> { ciudad.nombre } - { ciudad.estado } </p>
-                <button type="button" className="btn btn-success" onClick={ comprarProducto }>
-                  Comprar
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </>
-      );
-    }
-
+  return (
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Detalles del Usuario</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSubmit(onSubmit)}> 
+          <Form.Group className='mb-3'>
+            <Form.Label>Apellido</Form.Label>
+            <Form.Control type='text' placeholder='Apellido' {...register("apellido", { required: true })}/>
+          </Form.Group>
+          <Form.Group className='mb-3'>
+            <Form.Label>Nombre</Form.Label>
+            <Form.Control type='text' placeholder='Nombre' {...register("nombre",{ required: true })}/>
+          </Form.Group>
+          <Form.Group className='mb-3'>
+            <Form.Label>DNI</Form.Label>
+            <Form.Control type='text' placeholder='DNI' {...register("dni",{ required: true })}/>
+          </Form.Group>
+          <Form.Group className='mb-3'>
+            <Form.Label>Teléfono</Form.Label>
+            <Form.Control type='text' {...register("telefono")}/>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Rol</Form.Label>
+            <Form.Select {...register("rol")}>
+              <option>Seleccionar</option>
+              <option value="admin">Admin</option>
+              <option value="consulta">Consulta</option>
+              <option value="vendedor">Vendedor</option>
+              <option value="gerente">Gerente</option>
+              <option value="atencion_cliente">Atención al cliente</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label> Email </Form.Label>
+            <Form.Control type="email" placeholder="Enter email" {...register("email", { required: true })} />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicCheckbox">
+            <Form.Check type="checkbox" label="Estoy de acuerdo con las políticas de la empresa" 
+              {...register("acuerdo", { required: true })}/>
+          </Form.Group>
+          <Button variant="primary" type="submit">Guardar Cambios</Button> 
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Cerrar
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
 }
+
+export default UserDetailModal;

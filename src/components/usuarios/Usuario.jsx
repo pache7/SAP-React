@@ -1,24 +1,69 @@
-import Card from 'react-bootstrap/Card'
+import React, { useState, useEffect } from 'react';
+import Table from 'react-bootstrap/Table';
+import axios from 'axios';
 
-import { Link } from "react-router-dom"
+const PerfilUsuario = ({ user_name , user_apellido,user_telefono,user_email,userRol}) => { 
+  const [avatars, setAvatars] = useState([]);
+  const [datos,setDatos] = useState([]);
 
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      try {
+        const response = await axios.get(`https://api.dicebear.com/8.x/personas/svg?seed=${user_name}`);
+        const avatarUrl = response.config.url;
+        setAvatars([{ username: user_name, avatarUrl }]); 
+        setDatos([{nombre: user_name, apellido:user_apellido, telefono:user_telefono, email:user_email, rol: userRol}])
+      } catch (error) {
+        console.error('Error fetching avatars:', error);
+      }
+    };
 
-export default function Producto({ title, price, address, thumbnail, id }){
-    return(
-        <>
-            
-            <div className="col-3">
-                <Card data-bs-theme="light" className='mt-3'>
-                    <Card.Img variant="top" src={ thumbnail } />
-                    <Card.Body>
-                        <Card.Title>{title}</Card.Title>
-                        <Card.Text>Ciudad vendedor: {address && address.city_name} - {address && address.state_name}</Card.Text>
-                        <Card.Text>Precio: ${price}</Card.Text>
+    if (user_name) { 
+      fetchAvatars();
+    }
+  }, [user_name],[user_apellido],[user_telefono],[user_email],[userRol]);
 
-                        <Link to={`/productos/${id}`} className='btn btn-success'>Ver</Link>
-                    </Card.Body>
-                </Card>
+  return (
+    <div>
+      <h2>Perfil del Usuario</h2>
+      
+        {avatars.map((avatar, index) => (
+          <div key={index}>
+            <img src={avatar.avatarUrl} alt={avatar.username} style={{width:'300px',height:'300px'}} />
+
+          </div>
+        ))}
+         <div>
+            <br />
+            <h2> Datos del Usuario </h2>
+            <Table responsive>
+            <thead>
+                <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                {datos.map((dato, index) => (
+                <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{dato.nombre}</td>
+                    <td>{dato.apellido}</td>
+                    <td>{dato.telefono}</td>
+                    <td>{dato.email}</td>
+                    <td>{dato.rol}</td>
+                </tr>
+                ))}
+            </tbody>
+            </Table>
             </div>
-        </>
-    )
-}
+   
+    </div>
+  );
+};
+
+export default PerfilUsuario;

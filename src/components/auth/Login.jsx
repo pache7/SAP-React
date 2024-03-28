@@ -1,36 +1,42 @@
-import { useForm } from 'react-hook-form'
-import { Form } from 'react-bootstrap'
-import { useState } from 'react'
+import { useForm } from 'react-hook-form';
+import { Form } from 'react-bootstrap';
+import { useState } from 'react';
 import { AlertNavigation } from '../template/AlertNavigation';
 import ButtonLoading from '../template/ButtonLoading';
 import { fireLogin } from '../../services/authServices';
 import { errorMessage } from '../../Utils/errorMessaje';
 import Card from 'react-bootstrap/Card';
 
-export default function Login({setLogin, setUserName}) {
+export default function Login({ setLogin, setUserName, setUserApellido, setUserTelefono, setUserEmail, setUserRol }) {
 
-    const { register ,handleSubmit, formState: {errors} } = useForm({mode:"onChange"});
-    const [alert, setAlert] = useState({variant:'',text:'',duration:0,link:''});
-    const [loading,setLoading] = useState(false);
+    const { register, handleSubmit, formState: { errors } } = useForm({ mode: "onChange" });
+    const [alert, setAlert] = useState({ variant: '', text: '', duration: 0, link: '' });
+    const [loading, setLoading] = useState(false);
 
-    const onSubmit = async (data)=>{
+    const onSubmit = async (data) => {
 
         setLoading(true);
-        try{
+        try {
             const responseLogin = await fireLogin(data);
 
-            setUserName(`${responseLogin?.apellido} ${responseLogin?.nombre}`);
+            setUserName(`${responseLogin?.nombre}`);
+            setUserApellido(`${responseLogin?.apellido}`);
+            setUserTelefono(`${responseLogin?.telefono}`);
+            setUserEmail(`${responseLogin?.email}`);
+            setUserRol(`${responseLogin?.rol}`);
+
             setAlert({
                 variant: "success",
                 text: `Bienvenido ${responseLogin?.apellido} ${responseLogin?.nombre}!`,
                 duration: 3000,
-                link: '/productos'
+                link: '/usuario'
             })
             setLoading(false);
             setLogin(true);
+
             console.log('responseLogin')
             console.log(responseLogin)
-        }catch (e){
+        } catch (e) {
             console.log(e)
             setAlert({
                 variant: "danger",
@@ -41,40 +47,41 @@ export default function Login({setLogin, setUserName}) {
         }
     }
 
-  return (
-    <div className="row">
+    return (
+        <div className="row">
 
-        <div className='col-6'>
+            <div className='col w-100'>
 
-        <Card style={{ width: '18rem' }}>            
-            <Card.Img variant="top" className='mt-3' style={{ width: '50px', margin: 'auto' }} 
-                src='src\assets\img\user_icon.jpg' 
-            />
-            <Card.Body>
-                <Card.Title> Iniciar Sesión</Card.Title>
-                <Form onSubmit={ handleSubmit(onSubmit) }>
+                <h3 className="mt-3 mb-3"> <AlertNavigation {...alert} /> </h3>
+                <div className="d-flex justify-content-center align-items-center vh-100" style={{ marginTop: '-50px' }}>
 
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label> Email </Form.Label>
-                        <Form.Control type="email" placeholder="Enter email" {...register("email", { required: true })} />
-                    </Form.Group>
+                    <Card style={{ width: '18rem' }}>
+                        <Card.Img variant="top" className='mt-3' style={{ width: '80px', margin: 'auto' }}
+                            src='src\assets\img\user_icon.jpg'
+                        />
+                        <Card.Body>
+                            <Card.Title> Iniciar Sesión</Card.Title>
+                            <Form onSubmit={handleSubmit(onSubmit)}>
 
-                    <Form.Group className="mb-3" controlId="formBasicPassword">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password" {...register("password",{ required: true })} />
-                    </Form.Group>
+                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                    <Form.Label> Email </Form.Label>
+                                    <Form.Control type="email" placeholder="Enter email" {...register("email", { required: true })} />
+                                </Form.Group>
 
-                    <ButtonLoading variant="primary" type="submit" loading={loading}>
-                        Login
-                    </ButtonLoading>
-                </Form>
-            </Card.Body>
-        </Card>
+                                <Form.Group className="mb-3" controlId="formBasicPassword">
+                                    <Form.Label>Password</Form.Label>
+                                    <Form.Control type="password" placeholder="Password" {...register("password", { required: true })} />
+                                </Form.Group>
 
+                                <ButtonLoading variant="primary" type="submit" loading={loading}>
+                                    Login
+                                </ButtonLoading>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                </div>
 
-        <br></br>
-        <AlertNavigation {...alert} />
+            </div>
         </div>
-    </div>
-  );
+    );
 }

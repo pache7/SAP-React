@@ -9,7 +9,8 @@ export const fireRegister = async(data)=>{
             nombre: data.nombre,
             apellido: data.apellido,
             dni: data.dni,
-            fecha_nac: data.telefono,
+            telefono: data.telefono,
+            email:data.email,
             rol: data.rol,
             userId: responseUser.user.uid
         })

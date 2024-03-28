@@ -5,9 +5,9 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import { Link } from "react-router-dom"
 
-export default function Nav_2({login, setLogin, user_name, setUserName }) {
+export default function Nav_2({login, setLogin, user_name, setUserName,user_apellido,setUserApellido }) {
   return (
-    <Navbar expand="lg" className="bg-body-tertiary">
+    <Navbar expand="lg" className="bg-body-tertiary" data-bs-theme="dark">
       <Container>
         
         <Navbar.Brand>Menu Principal</Navbar.Brand>
@@ -18,7 +18,7 @@ export default function Nav_2({login, setLogin, user_name, setUserName }) {
             
             <Nav.Link as={Link} to="/"> Inicio </Nav.Link>
             {login &&
-            <Nav.Link as={Link} to="/productos">Productos</Nav.Link>
+            <Nav.Link as={Link} to="/usuarios"> Ver Usuarios </Nav.Link>
             }
             
             <NavDropdown title="Usuarios" id="basic-nav-dropdown">
@@ -38,6 +38,7 @@ export default function Nav_2({login, setLogin, user_name, setUserName }) {
                 <Nav.Link onClick={()=>{
                     setLogin(false)
                     setUserName('')
+                    setUserApellido('')
                   }}>Cerrar sesión
                 </Nav.Link>
                 
@@ -49,7 +50,7 @@ export default function Nav_2({login, setLogin, user_name, setUserName }) {
         </Navbar.Collapse>
         {login &&
           <>
-            <i className="bi bi-person-circle"></i><h5>{user_name}</h5>
+            <i className="bi bi-person-circle"></i><h5 style={{ color:'white' }}>{user_name} {user_apellido}</h5>
           </>          
         }
       </Container>

@@ -1,105 +1,174 @@
-import { useEffect, useState } from 'react'
-import { InputGroup, FormControl, Button } from 'react-bootstrap';
-import Producto from './Usuario.jsx'
-import * as mp_services from '../../services/avatarServices.js'
-import { AlertNavigation } from '../template/AlertNavigation';
-import Spinner from 'react-bootstrap/Spinner';
+import React, { useState, useEffect } from 'react';
+import { getAllUsers, deleteUser,editUser } from '../../services/controllerServices';
+import Table from 'react-bootstrap/Table';
+import { Form } from 'react-bootstrap'
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
+const UsuariosRegistrados = () => {
+  const [usuarios, setUsuarios] = useState([]);
+  const [editedUser, setEditedUser] = useState(null);
+  const MySwal = withReactContent(Swal);
 
-export default function ProductosHome(){
-    
-    const [alert, setAlert] = useState({variant:'',text:'',duration:0,link:''});
-    const [myBusqueda, setMyBusqueda] = useState('Star Wars')
-    const [myTitulo, setMyTitulo] = useState(myBusqueda)
-    const [productos, setProductos] = useState([])
-    const [loading, setLoading] = useState(true)
-
-    const handleButtonBusqueda = async() => {
-      setLoading(true);
+  useEffect(() => {
+    const fetchUsuarios = async () => {
       try {
-        const response = await mp_services.getAll(myBusqueda);
-        setProductos(response.results);
-        
-        setMyTitulo(myBusqueda);
-        
-        setAlert({
-            variant: "success",
-            text: "Búsqueda Ok",
-            duration: 3000
-        }) 
-        setLoading(false);
-        setTimeout(()=>{
-            setAlert({variant:'',text:'',duration:0,link:''})            
-        },3000)
-        
-      } catch {
-        setLoading(false);
-        setAlert({
-            variant: "danger",
-            text: "Ooops... Ha ocurrido un error",
-            duration: 0
-        })
+        const usuariosData = await getAllUsers();
+        setUsuarios(usuariosData);
+      } catch (error) {
+        console.error('Error fetching users:', error);
       }
     };
 
-    useEffect(()=>{
-        const allProductos = async ()=>{
-            try{
-                const response = await mp_services.getAll(myBusqueda)              
-                
-                setProductos(response.results)
-                setLoading(false) 
-        
-            }catch(e){
-                setAlert({
-                    variant: "danger",
-                    text: "Ooops... Ha ocurrido un error",
-                    duration: 0
-                })
-            }
-        }
-        allProductos()
-    },[]);
+    fetchUsuarios();
+  }, []);
 
+  const showConfirmation = (id) => {
+    MySwal.fire({
+      title: '¿Estás seguro?',
+      text: '¡No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminarlo'
+    }).then((result) => {
+      if (result.isConfirmed) {
+       
+        handleDeleteUser(id);
+        MySwal.fire(
+          'Eliminado',
+          'El usuario ha sido eliminado.',
+          'success'
+        );
+      }
+    });
+  };
 
-    if(loading){
-        return <>
-            <div className="mt-5 pt-5">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-            </div>
-        </>
-    }else{
-        return(
-            <>
-                <div className="row">
-                    <InputGroup className="mb-3 mt-3">
-                        <FormControl placeholder="Ingrese palabra clave" value={myBusqueda}
-                            onChange={(e) => setMyBusqueda(e.target.value)}
-                        />
-                        <Button variant="primary" onClick={handleButtonBusqueda}>
-                            Buscar en MercadoLibre
-                        </Button>
-                    </InputGroup>
-                    <AlertNavigation {...alert} />
-                </div>
-                
-                <h1>{myTitulo}</h1>
-                
-                <div className="row">
-                    {productos.map((producto)=>(                      
-                        <Producto 
-                            key= { producto.id }
-                            id = { producto.id}
-                            title= { producto.title }
-                            price= { producto.price }
-                            address= { producto.address }    
-                            thumbnail = { producto.thumbnail }                         
-                        />  
-                    ))}
-                </div>
-            </>
-        )
+  const handleDeleteUser = async (id) => {
+    try {
+      await deleteUser(id);
+      
+      const updatedUsuarios = usuarios.filter((usuario) => usuario.id !== id);
+      setUsuarios(updatedUsuarios);
+      
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
-}
+  };
+
+  const handleEditButtonClick = (usuario) => {
+    setEditedUser(usuario); 
+    MySwal.fire({
+      title: 'Editar Usuario',
+      html: (
+        <Form>
+          <Form.Group controlId="formNombre">
+            <Form.Label>Nombre</Form.Label>
+            <Form.Control type="text" name="nombre" defaultValue={usuario.nombre} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group controlId="formApellido">
+            <Form.Label>Apellido</Form.Label>
+            <Form.Control type="text" name="apellido" defaultValue={usuario.apellido} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group controlId="formEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control type="email" name="email" defaultValue={usuario.email} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group controlId="formTelefono">
+            <Form.Label>telefono</Form.Label>
+            <Form.Control type="text" name="telefono" defaultValue={usuario.telefono} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group controlId="formRol">
+                <Form.Label>Rol</Form.Label>
+                <Form.Select>
+                    <option>Seleccionar</option>
+                    <option value="admin">Admin</option>
+                    <option value="consulta">Consulta</option>
+                    <option value="vendedor">Vendedor</option>
+                    <option value="gerente">Gerente</option>
+                    <option value="atencion_cliente">Atención al cliente</option>
+                </Form.Select>
+            </Form.Group>
+        </Form>
+      ),
+      showCancelButton: true,
+      confirmButtonText: 'Guardar Cambios',
+      cancelButtonText: 'Cancelar',
+      focusConfirm: false,
+      preConfirm: () => {
+        handleEditUser(usuario);
+      }
+    });
+  };
+
+  const handleEditUser = async (editedUser) => {
+    try {
+      if (!editedUser) {
+        throw new Error('No se ha seleccionado ningún usuario para editar.');
+      }
+
+      await editUser(editedUser.id, editedUser);
+      MySwal.fire(
+        'Guardado',
+        'Los cambios han sido guardados correctamente.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error editing user:', error);
+      MySwal.fire(
+        'Error',
+        'No se pudieron guardar los cambios. Por favor, inténtalo de nuevo.',
+        'error'
+      );
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedUser((prevUser) => ({
+      ...prevUser,
+      [name]: value,
+    }));
+  };
+
+
+  return (
+    <div>
+      <h2>Usuarios Registrados</h2>
+      <Table responsive>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>DNI</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {usuarios.map((usuario, index) => (
+            <tr key={usuario.id}>
+              <td>{index + 1}</td>
+              <td>{usuario.nombre}</td>
+              <td>{usuario.apellido}</td>
+              <td>{usuario.dni}</td>
+              <td>{usuario.telefono}</td>
+              <td>{usuario.email}</td>
+              <td>{usuario.rol}</td>
+              <td>
+               <button onClick={() => handleEditButtonClick(usuario)} className="btn btn-secondary">Editar</button>
+                <button onClick={() => showConfirmation(usuario.id)} className="btn btn-danger">Eliminar</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  );
+};
+
+export default UsuariosRegistrados;
