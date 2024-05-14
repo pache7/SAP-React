@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { Form } from 'react-bootstrap';
 import { useState } from 'react';
+import { useUserStore } from '../../store/userStore';
 import { AlertNavigation } from '../template/AlertNavigation';
 import ButtonLoading from '../template/ButtonLoading';
 import { fireLogin } from '../../services/authServices';
@@ -12,6 +13,8 @@ export default function Login({ setLogin, setUserName, setUserApellido, setUserT
     const { register, handleSubmit, formState: { errors } } = useForm({ mode: "onChange" });
     const [alert, setAlert] = useState({ variant: '', text: '', duration: 0, link: '' });
     const [loading, setLoading] = useState(false);
+
+    const setUserList = useUserStore((state) => state.setUserList);
 
     const onSubmit = async (data) => {
 

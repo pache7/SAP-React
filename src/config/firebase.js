@@ -5,14 +5,14 @@ import 'firebase/compat/firestore'
 
 //Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDbBa4GKy7lwz7Y2FkFHIzFH-3OzvtJfls",
-    authDomain: "my-react-vite-sad.firebaseapp.com",
-    databaseURL:"https://my-react-vite-sad-default-rtdb.firebaseio.com/",
-    projectId: "my-react-vite-sad",
-    storageBucket: "my-react-vite-sad.appspot.com",
-    messagingSenderId: "455185519040",
-    appId: "1:455185519040:web:03f86e1429f3193016b825"
-  };
+  apiKey: "AIzaSyACwuEDVAoc2JMI6SlicRuJeawFmOijIus",
+  authDomain: "react-vite-sap.firebaseapp.com",
+  databaseURL:"https://react-vite-sap-default-rtdb.firebaseio.com/",
+  projectId: "react-vite-sap",
+  storageBucket: "react-vite-sap.appspot.com",
+  messagingSenderId: "216111568345",
+  appId: "1:216111568345:web:2cf5b261ccfc5cb9f675c8"
+};
 
 
 firebase.initializeApp(firebaseConfig);

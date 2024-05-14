@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { getAllUsers, deleteUser,editUser } from '../../services/controllerServices';
+import { getAllUsers, deleteUser, editUser } from '../../services/controllerServices';
+import { useUserStore } from '../../store/userStore';
 import Table from 'react-bootstrap/Table';
 import { Form } from 'react-bootstrap'
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 const UsuariosRegistrados = () => {
-  const [usuarios, setUsuarios] = useState([]);
   const [editedUser, setEditedUser] = useState(null);
+  const { users, setUserList } = useUserStore();
   const MySwal = withReactContent(Swal);
+
 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const usuariosData = await getAllUsers();
-        setUsuarios(usuariosData);
+        setUserList(usuariosData);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -34,7 +36,7 @@ const UsuariosRegistrados = () => {
       confirmButtonText: 'Sí, eliminarlo'
     }).then((result) => {
       if (result.isConfirmed) {
-       
+
         handleDeleteUser(id);
         MySwal.fire(
           'Eliminado',
@@ -48,17 +50,17 @@ const UsuariosRegistrados = () => {
   const handleDeleteUser = async (id) => {
     try {
       await deleteUser(id);
-      
+
       const updatedUsuarios = usuarios.filter((usuario) => usuario.id !== id);
       setUsuarios(updatedUsuarios);
-      
+
     } catch (error) {
       console.error('Error deleting user:', error);
     }
   };
 
   const handleEditButtonClick = (usuario) => {
-    setEditedUser(usuario); 
+    setEditedUser(usuario);
     MySwal.fire({
       title: 'Editar Usuario',
       html: (
@@ -80,16 +82,16 @@ const UsuariosRegistrados = () => {
             <Form.Control type="text" name="telefono" defaultValue={usuario.telefono} onChange={handleChange} />
           </Form.Group>
           <Form.Group controlId="formRol">
-                <Form.Label>Rol</Form.Label>
-                <Form.Select>
-                    <option>Seleccionar</option>
-                    <option value="admin">Admin</option>
-                    <option value="consulta">Consulta</option>
-                    <option value="vendedor">Vendedor</option>
-                    <option value="gerente">Gerente</option>
-                    <option value="atencion_cliente">Atención al cliente</option>
-                </Form.Select>
-            </Form.Group>
+            <Form.Label>Rol</Form.Label>
+            <Form.Select>
+              <option>Seleccionar</option>
+              <option value="admin">Admin</option>
+              <option value="consulta">Consulta</option>
+              <option value="vendedor">Vendedor</option>
+              <option value="gerente">Gerente</option>
+              <option value="atencion_cliente">Atención al cliente</option>
+            </Form.Select>
+          </Form.Group>
         </Form>
       ),
       showCancelButton: true,
@@ -146,11 +148,13 @@ const UsuariosRegistrados = () => {
             <th>Teléfono</th>
             <th>Email</th>
             <th>Rol</th>
-            <th>Acciones</th>
+            {users.some(usuario => usuario.rol === 'admin') && (
+              <th>Acciones</th>
+            )}
           </tr>
         </thead>
         <tbody>
-          {usuarios.map((usuario, index) => (
+          {users.map((usuario, index) => (
             <tr key={usuario.id}>
               <td>{index + 1}</td>
               <td>{usuario.nombre}</td>
@@ -159,16 +163,22 @@ const UsuariosRegistrados = () => {
               <td>{usuario.telefono}</td>
               <td>{usuario.email}</td>
               <td>{usuario.rol}</td>
-              <td>
-               <button onClick={() => handleEditButtonClick(usuario)} className="btn btn-secondary">Editar</button>
-                <button onClick={() => showConfirmation(usuario.id)} className="btn btn-danger">Eliminar</button>
-              </td>
+              {usuario.rol === 'admin' && (
+                <td></td>
+              )}
+              {usuario.rol !== 'admin' && (
+                <td>
+                  <button onClick={() => handleEditButtonClick(usuario)} className="btn btn-secondary">Editar</button>
+                  <button onClick={() => showConfirmation(usuario.id)} className="btn btn-danger">Eliminar</button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </Table>
     </div>
   );
+  
 };
 
 export default UsuariosRegistrados;

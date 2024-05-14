@@ -21,6 +21,8 @@ export const fireRegister = async(data)=>{
 export const fireLogin = async (data)=>{
     const responseUser = await firebase.auth().signInWithEmailAndPassword(data.email, data.password);
 
+    console.log(`Usuario logueado:`, responseUser);
+
     if (responseUser.user.uid){
         const document = await firebase.firestore().collection("usuarios")
             .where("userId","==",responseUser.user.uid).get();

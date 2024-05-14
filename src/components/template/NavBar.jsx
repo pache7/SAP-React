@@ -39,7 +39,7 @@ export default function Nav_2({login, setLogin, user_name, setUserName,user_apel
                     setLogin(false)
                     setUserName('')
                     setUserApellido('')
-                  }}>Cerrar sesión
+                  }} as={Link} to="/">Cerrar sesión
                 </Nav.Link>
                 
               </NavDropdown.Item>
